@@ -1,26 +1,40 @@
 <?php
 session_start();
 
+/*
+ * NOTE: Salte should not be static. Generate a salt based on the user's info somewhere, or store it in a separete DB table...
+ */
 define("SALT", "FH3#%FNDNndJHDJj99920))^");
 define("PEPPER", "B29@!H3-039O^Fflkjfes83");
-$loggedIn = true; //do not leave this set as true, remove this when you need to be able to log in
+$loggedIn; //do not leave this set as true, remove this when you need to be able to log in
 $email = "Not set";
 $pass = "Not set";
 $submittedMsg = $_POST['submitMsg'];
 
+//process user login
+if (isset($_POST['submitli']))
+{
+  $email = $_POST['email'];
+  $pass = $_POST['password'];
+  //$pass = hash("sha-512", SALT . $_POST['password'] . PEPPER);
+  
+  echo "<div id='test'>";
+    echo "<h2>Login Info</h2>";
+    echo "<p>email: $email</p>";
+    echo "<p>pass: $pass</p>";
+  
+  echo "</div>";
+}
+
+//register the user as logged in
 if (!isset($_SESSION['logged_in']))
 {
   $_SESSION['logged_in'] = false;
   /* uncomment to control login form!
     $loggedIn = $_SESSION['loggedIn'];
    */
-}
-
-//process user login
-if (isset($_POST['submitli']))
-{
-  $email = $_POST['email'];
-  $pass = md5(SALT . $_POST['password'] . PEPPER);
+  
+    $loggedIn = $_SESSION['loggedIn'];
 }
 
 //process message to be sent by logged in user
@@ -59,6 +73,7 @@ if(isset($submittedMsg))
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
+    
     <link href="css/reset.css" rel="stylesheet" type="text/css">
     
     <style type="text/css">
@@ -104,6 +119,12 @@ if(isset($submittedMsg))
         border-radius: 10px;
       }
       
+      h1
+      {
+        font-size: 150%;
+        font-weight: bold;
+      }
+      
     </style>
     
     <!-- jQuery  -->
@@ -123,10 +144,10 @@ if(isset($submittedMsg))
         <div class="row">
 
           <div>
-            <form method="post" action="">
+            <form name="msg" method="post" action="">
               <div class="form-section">
                 <label for="emailAddress">Email address</label><br>
-                <input type="email" name="emailAddress" class="form-control" id="emailAddress" placeholder="Email">
+                <input type="email" name="emailAddress" id="emailAddress" placeholder="Email">
               </div>
 
               <div class="form-section">
