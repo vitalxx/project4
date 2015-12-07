@@ -6,6 +6,7 @@ define("PEPPER", "B29@!H3-039O^Fflkjfes83");
 $loggedIn = true; //do not leave this set as true, remove this when you need to be able to log in
 $email = "Not set";
 $pass = "Not set";
+$submittedMsg = $_POST['submitMsg'];
 
 if (!isset($_SESSION['logged_in']))
 {
@@ -15,12 +16,31 @@ if (!isset($_SESSION['logged_in']))
    */
 }
 
+//process user login
 if (isset($_POST['submitli']))
 {
-  //process user login
   $email = $_POST['email'];
   $pass = md5(SALT . $_POST['password'] . PEPPER);
 }
+
+//process message to be sent by logged in user
+if(isset($submittedMsg))
+{
+  $emailAddress = $_POST['emailAddress'];
+  $hour         = $_POST['hour']; 
+  $ampm         = $_POST['ampm'];
+  $message      = $_POST['message'];
+  
+  echo "<div id='test'>";
+    echo "<h2>Submitted Info</h2>";
+    echo "<p>email: $emailAddress</p>";
+    echo "<p>hour: $hour</p>";
+    echo "<p>ampm: $ampm</p>";
+    echo "<p>message: $message</p>";
+  
+  echo "</div>";
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -49,9 +69,39 @@ if (isset($_POST['submitli']))
         width: 500px;
       }
       
+      /* for testing only */
+      #test
+      {
+        margin: 15px auto 0;
+        padding: 10px;
+        width: 500px;
+        border: 1px solid red;
+      }
+      
+      #test h2
+      {
+        font-size: 120%;
+        font-weight: bold;
+      }
+      
       .form-section
       {
         margin-bottom: 15px;
+      }
+      
+      /* Buttons */
+      
+      .button
+      {
+        width: 100px;
+        height: 35px;
+        border: 2px solid #3399ff;
+        cursor: pointer;
+        color: #333;
+        background-color: #fefefe;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
       }
       
     </style>
@@ -73,7 +123,7 @@ if (isset($_POST['submitli']))
         <div class="row">
 
           <div>
-            <form>
+            <form method="post" action="">
               <div class="form-section">
                 <label for="emailAddress">Email address</label><br>
                 <input type="email" name="emailAddress" class="form-control" id="emailAddress" placeholder="Email">
@@ -95,18 +145,20 @@ if (isset($_POST['submitli']))
 
                 <select name="ampm">
                   
-                  <option>AM</option>
-                  <option>PM</option>
+                  <option value="am">AM</option>
+                  <option value="pm">PM</option>
 
                 </select>
               </div>
 
-              <label for="message">Message</label><br>
-              <textarea name="message" id="message" rows="5" cols="30" placeholder="Message"></textarea>
-
               <div class="form-section">
-                <button type="submit">Submit</button>
-                <button type="reset">Reset</button>
+                <label for="message">Message</label><br>
+                <textarea name="message" id="message" rows="5" cols="30" placeholder="Message"></textarea>
+              </div>
+              
+              <div class="form-section">
+                <button class="button" name="submitMsg" type="submit">Submit</button>
+                <button class="button" type="reset">Reset</button>
               </div>
             </form>
           </div>
