@@ -81,7 +81,7 @@ if(isset($reg))
   $email = $_POST['remail'];
   $pass = hash("sha512", SALT. $_POST['rpassword']);
   
-  $link = mysqli_connect($host, $user, $pass, $table);
+  $link = mysqli_connect($dbhost, $dbuser, $dbpass, $dbtable);
   if(!$link)
   {
     echo "Db not connecting. Error: " . mysqli_connect_error();
