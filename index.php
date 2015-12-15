@@ -1,29 +1,56 @@
 <?php
 session_start();
 
-/*
- * NOTE: Salte should not be static. Generate a salt based on the user's info somewhere, or store it in a separete DB table...
- */
 define("SALT", "FH3#%FNDNndJHDJj99920))^");
-define("PEPPER", "B29@!H3-039O^Fflkjfes83");
 $loggedIn; //do not leave this set as true, remove this when you need to be able to log in
-$email = "Not set";
-$pass = "Not set";
+$_SESSION['user'];
+$email = $_SESSION['user'];
 $submittedMsg = $_POST['submitMsg'];
+$reg = $_POST['register'];
+
+$success = "";
+require("functions.php");
 
 //process user login
 if (isset($_POST['submitli']))
 {
   $email = $_POST['email'];
-  $pass = $_POST['password'];
-  //$pass = hash("sha-512", SALT . $_POST['password'] . PEPPER);
+  $pass   = hash("sha512", SALT . $_POST['password']);
   
-  echo "<div id='test'>";
-    echo "<h2>Login Info</h2>";
-    echo "<p>email: $email</p>";
-    echo "<p>pass: $pass</p>";
+  $link = mysqli_connect("localhost", "root", "root", "project4");
+  if(!$link)
+  {
+    echo "Db not connecting. Error: " . mysqli_connect_error();
+    exit();
+  }
   
-  echo "</div>";
+  $pattern = '/@*\../';
+  $match = preg_match($pattern, $email);
+  
+  if($match != 1)
+  {
+    echo "Not a valid email";
+  }
+  else
+  {
+    //$query = "INSERT INTO users (username, password, created) VALUES ('$email', '$pass', NOW());";
+    $query = "SELECT * FROM users WHERE username = '$email' AND password = '$pass'";
+    $sql = mysqli_query($link, $query);
+    
+    if(!$sql)
+    {
+      echo "Not inserting into db: " . mysqli_error($link);
+      exit();
+    }
+    else
+    {
+      $_SESSION['logged_in'] = true;
+      $_SESSION['user'] = $email;
+    }
+    
+  }
+  
+  mysqli_close($link);
 }
 
 //register the user as logged in
@@ -37,22 +64,116 @@ if (!isset($_SESSION['logged_in']))
     $loggedIn = $_SESSION['loggedIn'];
 }
 
+if(isset($reg))
+{
+  $email = $_POST['remail'];
+  $pass = hash("sha512", SALT. $_POST['rpassword']);
+  
+  $link = mysqli_connect("localhost", "root", "root", "project4");
+  if(!$link)
+  {
+    echo "Db not connecting. Error: " . mysqli_connect_error();
+    exit();
+  }
+  
+  $pattern = '/@*\../';
+  $match = preg_match($pattern, $email);
+  
+  if($match != 1)
+  {
+    echo "Not a valid email";
+  }
+  else
+  {
+    $query = "INSERT INTO users (username, password, created) VALUES ('$email', '$pass', NOW());";
+    $sql = mysqli_query($link, $query);
+    
+    if(!$sql)
+    {
+      echo "Not inserting into db: " . mysqli_error($link);
+      exit();
+    }
+    else
+    {
+      $_SESSION['logged_in'] = true;
+      $_SESSION['user'] = $email;
+      echo 'Welcome, ' . $email . '! You are now logged in. <a href="index.php">Click here</a> to go to the main page.';
+    }
+    
+  }
+  
+  mysqli_close($link);
+}
+
 //process message to be sent by logged in user
 if(isset($submittedMsg))
 {
-  $emailAddress = $_POST['emailAddress'];
-  $hour         = $_POST['hour']; 
-  $ampm         = $_POST['ampm'];
+  $hour             = $_POST['hour']; 
+  $ampm          = $_POST['ampm'];
+  $month          = $_POST['month'];
+  $day               = ($_POST['day'] < 10) ? "0" . $_POST['day'] : $_POST['day'];
+  $year              = $_POST['year'];
+  $date             = "$month:$day:$year";
   $message      = $_POST['message'];
+  $timestamp   = "$date:$hour:$ampm";
   
-  echo "<div id='test'>";
-    echo "<h2>Submitted Info</h2>";
-    echo "<p>email: $emailAddress</p>";
-    echo "<p>hour: $hour</p>";
-    echo "<p>ampm: $ampm</p>";
-    echo "<p>message: $message</p>";
+  $link = mysqli_connect("localhost", "root", "root", "project4");
+  if(!$link)
+  {
+    echo "DB not connecting. Error: " . mysqli_connect_error();
+    exit();
+  }
+ 
+  $error = "";
   
-  echo "</div>";
+  if($hour == "time")
+  {
+    $error = "Invalid hour<br>";
+  }
+  
+  if($month == "mon")
+  {
+    $error .= "Invalid month<br>";
+  }
+  
+  if($day == "d")
+  {
+    $error .= "Invalid day<br>";
+  }
+  
+  if($day == "y")
+  {
+    $error .= "Invalid year<br>";
+  }
+  
+  if($message == "")
+  {
+    $error .= "Your message contains no text!";
+  }
+  
+  if($error != "")
+  {
+    echo $error;
+    exit();
+  }
+  
+  //query
+  $query = "INSERT INTO messages (username, msg, scheduled_time) VALUES ('$email', '$message', '$timestamp')"; //insert into table messages
+  $sql = mysqli_query($link, $query);
+    
+  //check if query works
+  if(!$sql)
+  {
+    echo "Not inserting into db: " . mysqli_error($link);
+    exit();
+  }
+  else
+  {
+    $dateTime = explode(":", $timestamp);
+    $success  = "Email stored and will send out on " . $dateTime[0] . " "  . $dateTime[1] . ", " . $dateTime[2] . " " . $dateTime[3] . ":" . $dateTime[4] . " " . $dateTime[5];
+  }
+  
+  mysqli_close($link);
 }
 
 ?>
@@ -125,6 +246,22 @@ if(isset($submittedMsg))
         font-weight: bold;
       }
       
+      a
+      {
+        color: #3399ff;
+        text-decoration: none;
+      }
+      
+      a:hover
+      {
+        text-decoration: underline;
+      }
+      
+      a:visited
+      {
+        
+      }
+      
     </style>
     
     <!-- jQuery  -->
@@ -135,10 +272,14 @@ if(isset($submittedMsg))
 
     <div id="container">
       
-      <?php if (!$loggedIn): ?>
+      <?php if (!$_SESSION['logged_in'] && $_GET['p'] != "register"): ?>
 
         <?php require("login.php"); ?>
 
+      <?php elseif (!$_SESSION['logged_in'] && $_GET['p'] == "register"): ?>
+      
+        <?php require("register.php"); ?>
+      
       <?php else: ?>
 
         <div class="row">
@@ -146,16 +287,46 @@ if(isset($submittedMsg))
           <div>
             <form name="msg" method="post" action="">
               <div class="form-section">
-                <label for="emailAddress">Email address</label><br>
-                <input type="email" name="emailAddress" id="emailAddress" placeholder="Email">
+                <h1>Project 4</h1> <a href="logout.php">Logout</a>
               </div>
 
               <div class="form-section">
 
                 <label>Choose the time to send the email</label><br>
+                
+                <select name="month">
+                  <option value="mon" selected>Month</option>
+                  <option value="January">January</option>
+                  <option value="February">February</option>
+                  <option value="March">March</option>
+                  <option value="April">April</option>
+                  <option value="May">May</option>
+                  <option value="June">June</option>
+                  <option value="July">July</option>
+                  <option value="August">August</option>
+                  <option value="September">September</option>
+                  <option value="October">October</option>
+                  <option value="November">November</option>
+                  <option value="December">December</option>
+                </select>
+                
+                <select name="day">
+                  <option value="d" selected>Day</option>
+                  <?php for($i = 1; $i < 32; $i++): ?>
+                    <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+                  <?php endfor; ?>
+                </select>
+                
+                <select name="year">
+                    <option value="y" selected>Year</option>
+                  <?php for($i = date("Y"); $i < date("Y") + 5; $i++): ?>
+                    <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+                  <?php endfor; ?>
+                </select>
+                
                 <select name="hour">
                     
-                    <option selected>Time</option>
+                    <option value="time" selected>Time</option>
 
                     <?php for ($i = 1; $i < 13; $i++): ?>
                       <option value="<?php echo $i; ?>:00"><?php echo $i; ?>:00</option>
@@ -177,10 +348,17 @@ if(isset($submittedMsg))
                 <textarea name="message" id="message" rows="5" cols="30" placeholder="Message"></textarea>
               </div>
               
+              <?php if($success != ""): ?>
+              <div class="form-section">
+                <?php echo $success; ?>
+              </div>
+              <?php endif; ?>
+              
               <div class="form-section">
                 <button class="button" name="submitMsg" type="submit">Submit</button>
                 <button class="button" type="reset">Reset</button>
               </div>
+              
             </form>
           </div>
 
