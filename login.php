@@ -22,6 +22,11 @@
                   <div class="form-section">
                     Not a member? <a href="?p=register">Sign up!</a>
                   </div>
+                  <?php if($success != ""): ?>
+                  <div class="form-section error">
+                    <?php echo $success; ?>
+                  </div>
+                  <?php endif; ?>
                 </form>
               </div>
             </div>

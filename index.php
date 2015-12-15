@@ -1,15 +1,21 @@
 <?php
 session_start();
 
+require("functions.php");
+
 define("SALT", "FH3#%FNDNndJHDJj99920))^");
-$loggedIn; //do not leave this set as true, remove this when you need to be able to log in
+$loggedIn;
 $_SESSION['user'];
 $email = $_SESSION['user'];
 $submittedMsg = $_POST['submitMsg'];
 $reg = $_POST['register'];
-
 $success = "";
-require("functions.php");
+
+//db variables
+$dbhost  = "localhost";
+$dbuser  = "root";
+$dbpass  = "root";
+$dbtable = "project4";
 
 //process user login
 if (isset($_POST['submitli']))
@@ -17,35 +23,45 @@ if (isset($_POST['submitli']))
   $email = $_POST['email'];
   $pass   = hash("sha512", SALT . $_POST['password']);
   
-  $link = mysqli_connect("localhost", "root", "root", "project4");
+  $link = mysqli_connect($dbhost, $dbuser, $dbpass, $dbtable);
+  
   if(!$link)
   {
     echo "Db not connecting. Error: " . mysqli_connect_error();
     exit();
   }
   
-  $pattern = '/@*\../';
+  $pattern = '/@*[A-Za-z]+\../';
   $match = preg_match($pattern, $email);
   
   if($match != 1)
   {
-    echo "Not a valid email";
+    echo "Not a valid email: $email";
   }
   else
   {
-    //$query = "INSERT INTO users (username, password, created) VALUES ('$email', '$pass', NOW());";
+    
+    //set up query and find if user/pw combination was correct
     $query = "SELECT * FROM users WHERE username = '$email' AND password = '$pass'";
     $sql = mysqli_query($link, $query);
     
+    //see if not selecting for some reason
     if(!$sql)
     {
-      echo "Not inserting into db: " . mysqli_error($link);
+      echo "Not selectring from db: " . mysqli_error($link);
       exit();
+    }
+    
+    if(mysqli_num_rows($sql) > 0)
+    {
+      //match found, register user as logged in
+      $_SESSION['logged_in'] = true;
+      $_SESSION['user'] = $email;
     }
     else
     {
-      $_SESSION['logged_in'] = true;
-      $_SESSION['user'] = $email;
+      //no matches found
+      $success = "Username and password combination incorrect. Try again.";
     }
     
   }
@@ -57,11 +73,7 @@ if (isset($_POST['submitli']))
 if (!isset($_SESSION['logged_in']))
 {
   $_SESSION['logged_in'] = false;
-  /* uncomment to control login form!
-    $loggedIn = $_SESSION['loggedIn'];
-   */
-  
-    $loggedIn = $_SESSION['loggedIn'];
+  $loggedIn = $_SESSION['loggedIn'];
 }
 
 if(isset($reg))
@@ -69,7 +81,7 @@ if(isset($reg))
   $email = $_POST['remail'];
   $pass = hash("sha512", SALT. $_POST['rpassword']);
   
-  $link = mysqli_connect("localhost", "root", "root", "project4");
+  $link = mysqli_connect($host, $user, $pass, $table);
   if(!$link)
   {
     echo "Db not connecting. Error: " . mysqli_connect_error();
@@ -238,6 +250,11 @@ if(isset($submittedMsg))
         -webkit-border-radius: 10px;
         -moz-border-radius: 10px;
         border-radius: 10px;
+      }
+      
+      .error
+      {
+        color: #ff0000;
       }
       
       h1
