@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Dec 15, 2015 at 11:01 PM
+-- Generation Time: Dec 15, 2015 at 08:00 PM
 -- Server version: 5.5.42
 -- PHP Version: 5.6.10
 
@@ -30,7 +30,8 @@ CREATE TABLE `messages` (
   `mid` int(11) NOT NULL,
   `username` varchar(35) NOT NULL,
   `msg` mediumtext NOT NULL,
-  `scheduled_time` varchar(35) NOT NULL
+  `scheduled_time` varchar(35) NOT NULL,
+  `recipient` varchar(35) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

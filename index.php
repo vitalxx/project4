@@ -42,6 +42,7 @@ if (isset($_POST['submitli']))
     //set up query and find if user/pw combination was correct
     $getSalt = "SELECT salt FROM users WHERE username = '$email'";
     $result = mysqli_query($link, $getSalt);
+    $res;
     if($result->num_rows > 0) {
       $res = $result->fetch_assoc();
     }
@@ -49,7 +50,8 @@ if (isset($_POST['submitli']))
       echo "Username and password combination incorrect. Try again.";
       exit();
     }
-    $thisPass = hash("sha512", $res['salt'], $_POST['password']);
+    
+    $thisPass = hash("sha512", $res['salt'] . $_POST['password']);
 
     $query = "SELECT * FROM users WHERE username = '$email' AND password = '$thisPass'";
     $sql = mysqli_query($link, $query);
@@ -95,7 +97,7 @@ if(isset($reg))
     echo "Password must be at least 8 characters. please try again";
     exit();
   }
-  $pass = hash("sha512", $salt, $_POST['rpassword']);
+  $pass = hash("sha512", $salt . $_POST['rpassword']);
   
   $link = mysqli_connect($dbhost, $dbuser, $dbpass, $dbtable);
   if(!$link)
@@ -125,7 +127,6 @@ if(isset($reg))
     {
       $_SESSION['logged_in'] = true;
       $_SESSION['user'] = $email;
-      echo 'Welcome, ' . $email . '! You are now logged in. <a href="index.php">Click here</a> to go to the main page.';
     }
   }
 
@@ -135,6 +136,7 @@ if(isset($reg))
 //process message to be sent by logged in user
 if(isset($submittedMsg))
 {
+  $recipient      = $_POST['recipient'];
   $hour             = $_POST['hour']; 
   $ampm          = $_POST['ampm'];
   $month          = $_POST['month'];
@@ -152,6 +154,11 @@ if(isset($submittedMsg))
   }
  
   $error = "";
+  
+  if($recipient == "")
+  {
+    $error = "Invalid recipient<br>";
+  }
   
   if($hour == "time")
   {
@@ -185,7 +192,7 @@ if(isset($submittedMsg))
   }
   
   //query
-  $query = "INSERT INTO messages (username, msg, scheduled_time) VALUES ('$email', '$message', '$timestamp')"; //insert into table messages
+  $query = "INSERT INTO messages (username, msg, scheduled_time, recipient) VALUES ('$email', '$message', '$timestamp', '$recipient')";
   $sql = mysqli_query($link, $query);
     
   //check if query works
@@ -197,7 +204,7 @@ if(isset($submittedMsg))
   else
   {
     $dateTime = explode(":", $timestamp);
-    $success  = "Email stored and will send out on " . $dateTime[0] . " "  . $dateTime[1] . ", " . $dateTime[2] . " " . $dateTime[3] . ":" . $dateTime[4] . " " . $dateTime[5];
+    $success  = "Email stored and will send to $recipient on " . $dateTime[0] . " "  . $dateTime[1] . ", " . $dateTime[2] . " " . $dateTime[3] . ":" . $dateTime[4] . " " . $dateTime[5];
   }
   
   mysqli_close($link);
@@ -304,6 +311,11 @@ if(isset($submittedMsg))
               <div class="form-section">
                 <h1>Project 4</h1> <a href="logout.php">Logout</a>
               </div>
+              
+              <div class="form-section">
+                    <label class="sr-only" for="recipient">Recipient: </label><br>
+                    <input type="email" name="recipient" class="form-control" id="recipient" size="35" placeholder="Email">
+                  </div>
 
               <div class="form-section">
 

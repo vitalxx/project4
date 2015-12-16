@@ -1,7 +1,11 @@
 <?php
 
 //$link = mysqli_connect("localhost", "root", "root", "project4");
-$link = new mysqli("localhost", "root", "root", "project4");
+$dbhost  = "localhost";
+$dbuser  = "root";
+$dbpass  = "root";
+$dbtable = "project4";
+$link = new mysqli($dbhost, $dbuser, $dbpass, $dbtable);
   if($link->connect_error)
   {
     echo "Db not connecting. Error: " . $link->connect_error;
@@ -14,16 +18,48 @@ $link = new mysqli("localhost", "root", "root", "project4");
   
   if($result->num_rows > 0)
   {
-    echo "Messages to send in the next half hour:<br>";
+    echo "Messages to send:<br>";
     while($row = $result->fetch_assoc())
     {
       $time = explode(":", $row['scheduled_time']);
+      $sendIt = 0;
       
-      //echo "<div>" . $row['username'] . " " . $row['msg'] . " " . $row['scheduled_time'] . "</div>";
-      
-      if($time[0] == date("F") && $time[1] == date("d") && $time[2] == date("Y") && $time[3] == date("g") && date("i") <= $time[4] && $time[5] == date("a"))
+      if($time[0] == date("F"))
       {
-        echo "<div>" . $row['username'] . " " . $row['msg'] . " " . $row['scheduled_time'] . "</div>";
+        $sendIt++;
+      }
+      
+      if($time[1] == date("d"))
+      {
+        $sendIt++;
+      }
+     
+      if($time[2] == date("Y"))
+      {
+        $sendIt++;
+      }
+      
+      if($time[3] <= date("g"))
+      {
+        $sendIt++;
+      }
+      
+      if($time[4] <= date("i"))
+      {
+        $sendIt++;
+      }
+     
+      if($time[5] == date("a"))
+      {
+        $sendIt++;
+      }
+      
+      if($sendIt == 6)
+      {
+        $headers = 'From: ' . $row['username'] . "\r\n" .
+        'Reply-To: ' . $row['username'] . "\r\n";
+          echo "mailing...";
+          mail($row['recipient'], "You have a new message from " . $row['username'], $row['msg'], $headers);
       }
       
     }
