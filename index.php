@@ -293,13 +293,9 @@ if(isset($submittedMsg))
     <div id="container">
       
       <?php if (!$_SESSION['logged_in'] && $_GET['p'] != "register"): ?>
-
         <?php require("login.php"); ?>
-
       <?php elseif (!$_SESSION['logged_in'] && $_GET['p'] == "register"): ?>
-      
         <?php require("register.php"); ?>
-  
       <?php else: ?>
 
         <div class="row">
