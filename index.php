@@ -90,6 +90,12 @@ if(isset($reg))
 {
   $email = $_POST['remail'];
   $salt = SALT;
+  $pass = $_POST['rpassword'];
+
+  if(strlen($pass) < 8){
+    echo "Password must be at least 8 characters. please try again";
+    exit();
+  }
   $pass = hash("sha512", $salt, $_POST['rpassword']);
   
   $link = mysqli_connect($dbhost, $dbuser, $dbpass, $dbtable);
@@ -307,7 +313,7 @@ if(isset($submittedMsg))
       <?php elseif (!$_SESSION['logged_in'] && $_GET['p'] == "register"): ?>
       
         <?php require("register.php"); ?>
-      
+  
       <?php else: ?>
 
         <div class="row">
