@@ -2,8 +2,7 @@
 session_start();
 
 require("functions.php");
-
-define("SALT", "FH3#%FNDNndJHDJj99920))^");
+define("SALT", rand());
 $loggedIn;
 $_SESSION['user'];
 $email = $_SESSION['user'];
@@ -42,7 +41,11 @@ if (isset($_POST['submitli']))
   {
     
     //set up query and find if user/pw combination was correct
-    $query = "SELECT * FROM users WHERE username = '$email' AND password = '$pass'";
+    $getSalt = "SELECT salt FROM users WHERE username = '$email'";
+    $salt = mysqli_query($link, $getSalt);
+    $thisPass = hash("sha512", $salt . $_POST['password']);
+
+    $query = "SELECT * FROM users WHERE username = '$email' AND password = '$thisPass'";
     $sql = mysqli_query($link, $query);
     
     //see if not selecting for some reason
@@ -79,7 +82,8 @@ if (!isset($_SESSION['logged_in']))
 if(isset($reg))
 {
   $email = $_POST['remail'];
-  $pass = hash("sha512", SALT. $_POST['rpassword']);
+  $salt = SALT;
+  $pass = hash("sha512", SALT . $_POST['rpassword']);
   
   $link = mysqli_connect($dbhost, $dbuser, $dbpass, $dbtable);
   if(!$link)
@@ -97,7 +101,7 @@ if(isset($reg))
   }
   else
   {
-    $query = "INSERT INTO users (username, password, created) VALUES ('$email', '$pass', NOW());";
+    $query = "INSERT INTO users (username, password, salt, created) VALUES ('$email', '$pass', '$salt', NOW());";
     $sql = mysqli_query($link, $query);
     
     if(!$sql)
