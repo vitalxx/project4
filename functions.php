@@ -10,7 +10,7 @@
  */
 function validMonthAndDay($mon, $day)
 {
-  $months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  $months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   
   for($i = 0; $i < count($months); $i++)
   {
@@ -36,31 +36,53 @@ function validDay($mon, $day)
 {
   switch($mon)
   {
-    case "jan":
+    case "January":
       return ($day <= 31);
-    case "feb":
+    case "February":
       return ($day <= 28);
-    case "mar":
+    case "March":
       return ($day <= 31);
-    case "apr":
+    case "April":
       return ($day <= 30);
-    case "may":
+    case "May":
       return ($day <= 31);
-    case "jun":
+    case "June":
       return ($day <= 30);
-    case "jul":
+    case "July":
       return ($day <= 31);
-    case "aug":
+    case "August":
       return ($day <= 31);
-    case "sep":
+    case "Septempber":
       return ($day <= 30);
-    case "oct":
+    case "October":
       return ($day <= 31);
-    case "nov":
+    case "November":
       return ($day <= 30);
-    case "dec":
+    case "December":
       return ($day <= 31);
     default:
       return "false";
   }
 } //validDay()
+
+function getCurrentMonth($mon)
+{
+  $mon  = date("F");
+  $months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  
+  for($i = 0; $i < count($months); $i++)
+  {
+    if($mon == $months[i])
+    {
+      return $mon;
+    }
+    return $mon;
+  }
+}
+
+//get $months array
+function getAllMonths()
+{
+  $months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  return $months;
+}

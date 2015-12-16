@@ -2,7 +2,7 @@
 
 define("SALT", "FH3#%FNDNndJHDJj99920))^");
 
-$email = "balls@yormom.com";
+$email = "balls@yourmom.com";
 $pass = hash("sha512", SALT . "balls1!");
 
 //$link = mysqli_connect("localhost", "root", "root", "project4");

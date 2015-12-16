@@ -81,7 +81,7 @@ if(isset($reg))
   $email = $_POST['remail'];
   $pass = hash("sha512", SALT. $_POST['rpassword']);
   
-  $link = mysqli_connect($host, $user, $pass, $table);
+  $link = mysqli_connect($dbhost, $dbuser, $dbpass, $dbtable);
   if(!$link)
   {
     echo "Db not connecting. Error: " . mysqli_connect_error();
@@ -129,7 +129,7 @@ if(isset($submittedMsg))
   $message      = $_POST['message'];
   $timestamp   = "$date:$hour:$ampm";
   
-  $link = mysqli_connect("localhost", "root", "root", "project4");
+  $link = mysqli_connect($dbhost, $dbuser, $dbpass, $dbtable);
   if(!$link)
   {
     echo "DB not connecting. Error: " . mysqli_connect_error();
@@ -311,33 +311,28 @@ if(isset($submittedMsg))
 
                 <label>Choose the time to send the email</label><br>
                 
+                
+                   <?php 
+                      $m = getAllMonths(); 
+                    ?>
+                
                 <select name="month">
-                  <option value="mon" selected>Month</option>
-                  <option value="January">January</option>
-                  <option value="February">February</option>
-                  <option value="March">March</option>
-                  <option value="April">April</option>
-                  <option value="May">May</option>
-                  <option value="June">June</option>
-                  <option value="July">July</option>
-                  <option value="August">August</option>
-                  <option value="September">September</option>
-                  <option value="October">October</option>
-                  <option value="November">November</option>
-                  <option value="December">December</option>
+                  <?php for($i = 0; $i < count($m); $i++){ ?>
+                  
+                    <option value="<?php echo $m[$i]; ?>" <?php if($m[$i] == date("F")) {echo "selected";} ?>><?php echo $m[$i]; ?></option>
+                  
+                  <?php } ?>
                 </select>
                 
                 <select name="day">
-                  <option value="d" selected>Day</option>
                   <?php for($i = 1; $i < 32; $i++): ?>
-                    <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+                    <option value="<?php echo $i; ?>" <?php if($i == date("d")) {echo "selected";} ?>><?php echo $i; ?></option>
                   <?php endfor; ?>
                 </select>
                 
                 <select name="year">
-                    <option value="y" selected>Year</option>
                   <?php for($i = date("Y"); $i < date("Y") + 5; $i++): ?>
-                    <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+                    <option value="<?php echo $i; ?>" <?php if($i == date("Y")) {echo "selected";} ?>><?php echo $i; ?></option>
                   <?php endfor; ?>
                 </select>
                 
@@ -346,18 +341,31 @@ if(isset($submittedMsg))
                     <option value="time" selected>Time</option>
 
                     <?php for ($i = 1; $i < 13; $i++): ?>
-                      <option value="<?php echo $i; ?>:00"><?php echo $i; ?>:00</option>
-                      <option value="<?php echo $i; ?>:30"><?php echo $i; ?>:30</option>
+                    
+                      <?php
+                    
+                      /*
+                        $selected1 = false;
+                        $selected2 = false;
+                      
+                        if(date)
+                        {
+                          
+                        }
+                    */
+                      ?>
+                    
+                      <option value="<?php echo $i; ?>:00" <?php if($i == date("g") && date("i") >0 && date("i") < 30) {echo "selected";} ?>><?php echo $i; ?>:00</option>
+                      <option value="<?php echo $i; ?>:30" <?php if($i == date("g") && date("i") > 30) {echo "selected";} ?>><?php echo $i; ?>:30</option>
                     <?php endfor; ?>
                       
                 </select>
 
                 <select name="ampm">
-                  
-                  <option value="am">AM</option>
-                  <option value="pm">PM</option>
-
+                  <option value="am" <?php if(date("a") == "am") {echo "selected";} ?>>AM</option>
+                  <option value="pm" <?php if(date("a") == "pm") {echo "selected";} ?>>PM</option>
                 </select>
+                
               </div>
 
               <div class="form-section">
