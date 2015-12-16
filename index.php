@@ -2,8 +2,7 @@
 session_start();
 
 require("functions.php");
-
-define("SALT", "FH3#%FNDNndJHDJj99920))^");
+define("SALT", rand());
 $loggedIn;
 $_SESSION['user'];
 $email = $_SESSION['user'];
@@ -40,9 +39,19 @@ if (isset($_POST['submitli']))
   }
   else
   {
-    
     //set up query and find if user/pw combination was correct
-    $query = "SELECT * FROM users WHERE username = '$email' AND password = '$pass'";
+    $getSalt = "SELECT salt FROM users WHERE username = '$email'";
+    $result = mysqli_query($link, $getSalt);
+    if($result->num_rows > 0) {
+      $res = $result->fetch_assoc();
+    }
+    else {
+      echo "Username and password combination incorrect. Try again.";
+      exit();
+    }
+    $thisPass = hash("sha512", $res['salt'], $_POST['password']);
+
+    $query = "SELECT * FROM users WHERE username = '$email' AND password = '$thisPass'";
     $sql = mysqli_query($link, $query);
     
     //see if not selecting for some reason
@@ -79,7 +88,14 @@ if (!isset($_SESSION['logged_in']))
 if(isset($reg))
 {
   $email = $_POST['remail'];
-  $pass = hash("sha512", SALT. $_POST['rpassword']);
+  $salt = SALT;
+  $pass = $_POST['rpassword'];
+
+  if(strlen($pass) < 8){
+    echo "Password must be at least 8 characters. please try again";
+    exit();
+  }
+  $pass = hash("sha512", $salt, $_POST['rpassword']);
   
   $link = mysqli_connect($dbhost, $dbuser, $dbpass, $dbtable);
   if(!$link)
@@ -97,7 +113,7 @@ if(isset($reg))
   }
   else
   {
-    $query = "INSERT INTO users (username, password, created) VALUES ('$email', '$pass', NOW());";
+    $query = "INSERT INTO users (username, password, salt, created) VALUES ('$email', '$pass', '$salt', NOW());";
     $sql = mysqli_query($link, $query);
     
     if(!$sql)
@@ -111,9 +127,8 @@ if(isset($reg))
       $_SESSION['user'] = $email;
       echo 'Welcome, ' . $email . '! You are now logged in. <a href="index.php">Click here</a> to go to the main page.';
     }
-    
   }
-  
+
   mysqli_close($link);
 }
 
@@ -196,19 +211,8 @@ if(isset($submittedMsg))
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <title>Comp 484 - Lab 4</title>
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-    
+    <title>Comp 484 - Lab 4</title>    
     <link href="css/reset.css" rel="stylesheet" type="text/css">
-    
     <style type="text/css">
       
       #container
@@ -286,21 +290,15 @@ if(isset($submittedMsg))
     
   </head>
   <body>
-
     <div id="container">
       
       <?php if (!$_SESSION['logged_in'] && $_GET['p'] != "register"): ?>
-
         <?php require("login.php"); ?>
-
       <?php elseif (!$_SESSION['logged_in'] && $_GET['p'] == "register"): ?>
-      
         <?php require("register.php"); ?>
-      
       <?php else: ?>
 
         <div class="row">
-
           <div>
             <form name="msg" method="post" action="">
               <div class="form-section">
@@ -383,14 +381,10 @@ if(isset($submittedMsg))
                 <button class="button" name="submitMsg" type="submit">Submit</button>
                 <button class="button" type="reset">Reset</button>
               </div>
-              
             </form>
           </div>
-
         </div>
-
       <?php endif; ?>
     </div>
-
   </body>
 </html>
