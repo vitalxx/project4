@@ -46,6 +46,10 @@ if (isset($_POST['submitli']))
     if($result->num_rows > 0) {
       $res = $result->fetch_assoc();
     }
+    else {
+      echo "Username and password combination incorrect. Try again.";
+      exit();
+    }
     $thisPass = hash("sha512", $res['salt'], $_POST['password']);
 
     $query = "SELECT * FROM users WHERE username = '$email' AND password = '$thisPass'";
